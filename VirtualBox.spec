@@ -254,13 +254,15 @@ Requires:   %{name}-server%{?_isa} = %{version}-%{release}
 %description -n python%{python3_pkgversion}-%{name}
 Python3 XPCOM bindings to %{name}.
 
+
+%if %{with guest_additions}
 %package guest-additions
 Summary:    %{name} Guest Additions
 Group:      System Environment/Base
 Requires:   %{name}-kmod = %{version}
 Provides:   %{name}-kmod-common = %{version}-%{release}
 Requires:   xorg-x11-server-Xorg
-Requires:   xorg-x11-xinit wget coreutils
+Requires:   xorg-x11-xinit
 Provides:   %{name}-guest = %{version}-%{release}
 Obsoletes:  %{name}-guest < %{version}-%{release}
 %if "%(xserver-sdk-abi-requires 2>/dev/null)"
@@ -276,6 +278,32 @@ install Guest Additions (in menu: Devices | Insert Guest Additions CD-image file
 This subpackage provides tools that use kernel modules which support better
 integration of VirtualBox guests with the Host, including file sharing, clipboard sharing,
 video and mouse driver, USB and webcam proxy and Seamless mode.
+
+
+%package guest-additions-iso
+Summary:    %{name} Guest Additions ISO
+Group:      System Environment/Base
+Requires:   %{name}-kmod = %{version}
+Provides:   %{name}-kmod-common = %{version}-%{release}
+Requires:   xorg-x11-server-Xorg
+Requires:   xorg-x11-xinit wget coreutils
+Provides:   %{name}-guest-additions-iso = %{version}-%{release}
+Obsoletes:  %{name}-guest-additions-iso < %{version}-%{release}
+%if "%(xserver-sdk-abi-requires 2>/dev/null)"
+Requires:   %(xserver-sdk-abi-requires ansic)
+Requires:   %(xserver-sdk-abi-requires videodrv)
+Requires:   %(xserver-sdk-abi-requires xinput)
+%endif
+
+
+%description guest-additions-iso
+this package contains Guest Additions ISO File.
+this file is not hosted on rpmfusion servers
+but download with wget during postinstallation process
+rpmfusion does not provide any support for its use
+for any problem please contact Virtualbox
+%endif
+
 
 
 %package kmodsrc
@@ -666,6 +694,13 @@ install -p -m 0644 -D %{SOURCE2} %{buildroot}%{_metainfodir}/%{name}.appdata.xml
 #set_selinux_permissions /usr/lib/virtualbox /usr/share/virtualbox
 # vboxautostart-service
 
+
+# guest-additions-iso
+%if %{with guest_additions}
+mkdir -p %{buildroot}/usr/share/virtualbox/
+touch %{buildroot}/usr/share/virtualbox/deleteme
+%endif
+
 %pre server
 # Group for USB devices
 getent group vboxusers >/dev/null || groupadd -r vboxusers
@@ -726,6 +761,8 @@ fi
 %postun webservice
 %systemd_postun_with_restart vboxweb.service
 
+
+%if %{with guest_additions}
 %pre guest-additions
 # Add a group "vboxsf" for Shared Folders access
 # All users which want to access the auto-mounted Shared Folders have to
@@ -739,8 +776,6 @@ getent passwd vboxadd >/dev/null || \
 /sbin/ldconfig
 %systemd_post vboxclient.service
 %systemd_post vboxservice.service
-mkdir -p /usr/share/virtualbox/
-wget "https://download.virtualbox.org/virtualbox/7.0.18/VBoxGuestAdditions_7.0.18.iso" -O /usr/share/virtualbox/VBoxGuestAdditions.iso
 
 #chcon -u system_u -t mount_exec_t "$lib_path/$PACKAGE/mount.vboxsf" > /dev/null 2>&1
 # for i in "$lib_path"/*.so
@@ -759,12 +794,28 @@ wget "https://download.virtualbox.org/virtualbox/7.0.18/VBoxGuestAdditions_7.0.1
 %preun guest-additions
 %systemd_preun vboxclient.service
 %systemd_preun vboxservice.service
-rm -rf /usr/share/virtualbox/
 
 %postun guest-additions
 /sbin/ldconfig
 %systemd_postun_with_restart vboxclient.service
 %systemd_postun_with_restart vboxservice.service
+
+# Guest Additions ISO install
+%post guest-additions-iso
+/sbin/ldconfig
+%systemd_post vboxclient.service
+%systemd_post vboxservice.service
+wget "https://download.virtualbox.org/virtualbox/%{version}/VBoxGuestAdditions_%{version}.iso" -O /usr/share/virtualbox/VBoxGuestAdditions.iso
+chmod 777 /usr/share/virtualbox/VBoxGuestAdditions.iso
+
+
+%postun guest-additions-iso
+/sbin/ldconfig
+%systemd_postun_with_restart vboxclient.service
+%systemd_postun_with_restart vboxservice.service
+rm -rf /usr/share/virtualbox/VBoxGuestAdditions.iso
+%endif
+
 
 %files server
 %doc doc/*cpp doc/VMM
@@ -885,7 +936,11 @@ rm -rf /usr/share/virtualbox/
 %{_unitdir}/vboxservice.service
 %{_presetdir}/96-vboxguest.preset
 %{_udevrulesdir}/60-vboxguest.rules
+%files guest-additions-iso
+/usr/share/virtualbox/deleteme
 %endif
+
+
 
 %files kmodsrc
 %{_datadir}/%{name}-kmod-%{version}
