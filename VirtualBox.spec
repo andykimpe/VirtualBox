@@ -75,6 +75,30 @@ Source24:   os_mageia_x3.png
 Source25:   os_mageia_64_x3.png
 Source26:   os_mageia_x4.png
 Source27:   os_mageia_64_x4.png
+Source28:   debian_postinstall.sh
+Source29:   debian_preseed.cfg
+Source30:   fedora_ks.cfg
+Source31:   freebsd_installer.cfg
+Source32:   freebsd_postinstall.sh
+Source33:   ol8_ks.cfg
+Source34:   ol9_ks.cfg
+Source35:   ol_ks.cfg
+Source36:   ol_postinstall.sh
+Source37:   os2_cid_install.cmd
+Source38:   os2_response_files.rsp
+Source39:   os2_util.exe
+Source40:   redhat67_ks.cfg
+Source41:   redhat_postinstall.sh
+Source42:   rhel3_ks.cfg
+Source43:   rhel4_ks.cfg
+Source44:   rhel5_ks.cfg
+Source45:   suse_autoinstall.xml
+Source46:   ubuntu_preseed.cfg
+Source47:   win_nt5_unattended.sif
+Source48:   win_nt6_unattended.xml
+Source49:   win_postinstall.cmd
+Source50:   VBox.sh
+Source51:   VBoxSysInfo.sh
 
 Patch1:     VirtualBox-7.0.2-noupdate.patch
 Patch2:     VirtualBox-6.1.0-strings.patch
@@ -697,8 +721,30 @@ install -p -m 0644 -D %{SOURCE2} %{buildroot}%{_metainfodir}/%{name}.appdata.xml
 
 # guest-additions-iso
 %if %{with guest_additions}
-mkdir -p %{buildroot}/usr/share/virtualbox/
-touch %{buildroot}/usr/share/virtualbox/deleteme
+mkdir -p %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE28} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE29} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE30} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE31} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE32} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE33} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE34} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE35} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE36} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE37} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE39} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE40} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE41} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE42} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE43} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE44} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE45} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE46} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE47} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE48} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE49} %{buildroot}%{_datadir}/virtualbox/UnattendedTemplates/
+cp %{SOURCE50} %{buildroot}%{_datadir}/virtualbox/
+cp %{SOURCE51} %{buildroot}%{_datadir}/virtualbox/
 %endif
 
 %pre server
@@ -805,15 +851,16 @@ getent passwd vboxadd >/dev/null || \
 /sbin/ldconfig
 %systemd_post vboxclient.service
 %systemd_post vboxservice.service
-wget "https://download.virtualbox.org/virtualbox/%{version}/VBoxGuestAdditions_%{version}.iso" -O /usr/share/virtualbox/VBoxGuestAdditions.iso
-chmod 777 /usr/share/virtualbox/VBoxGuestAdditions.iso
+%{_datadir}/virtualbox/UnattendedTemplates/
+wget "https://download.virtualbox.org/virtualbox/%{version}/VBoxGuestAdditions_%{version}.iso" -O %{_datadir}/virtualbox//VBoxGuestAdditions.iso
+chmod 777 %{_datadir}/virtualbox//VBoxGuestAdditions.iso
 
 
 %postun guest-additions-iso
 /sbin/ldconfig
 %systemd_postun_with_restart vboxclient.service
 %systemd_postun_with_restart vboxservice.service
-rm -rf /usr/share/virtualbox/VBoxGuestAdditions.iso
+rm -rf %{_datadir}/virtualbox/VBoxGuestAdditions.iso
 %endif
 
 
@@ -937,7 +984,30 @@ rm -rf /usr/share/virtualbox/VBoxGuestAdditions.iso
 %{_presetdir}/96-vboxguest.preset
 %{_udevrulesdir}/60-vboxguest.rules
 %files guest-additions-iso
-/usr/share/virtualbox/deleteme
+%{_datadir}/virtualbox/UnattendedTemplates/debian_postinstall.sh
+%{_datadir}/virtualbox/UnattendedTemplates/debian_preseed.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/fedora_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/freebsd_installer.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/freebsd_postinstall.sh
+%{_datadir}/virtualbox/UnattendedTemplates/ol8_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/ol9_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/ol_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/ol_postinstall.sh
+%{_datadir}/virtualbox/UnattendedTemplates/os2_cid_install.cmd
+%{_datadir}/virtualbox/UnattendedTemplates/os2_response_files.rsp
+%{_datadir}/virtualbox/UnattendedTemplates/os2_util.exe
+%{_datadir}/virtualbox/UnattendedTemplates/redhat67_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/redhat_postinstall.sh
+%{_datadir}/virtualbox/UnattendedTemplates/rhel3_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/rhel4_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/rhel5_ks.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/suse_autoinstall.xml
+%{_datadir}/virtualbox/UnattendedTemplates/ubuntu_preseed.cfg
+%{_datadir}/virtualbox/UnattendedTemplates/win_nt5_unattended.sif
+%{_datadir}/virtualbox/UnattendedTemplates/win_nt6_unattended.xml
+%{_datadir}/virtualbox/UnattendedTemplates/win_postinstall.cmd
+%{_datadir}/virtualbox/VBox.sh
+%{_datadir}/virtualbox/VBoxSysInfo.sh
 %endif
 
 
